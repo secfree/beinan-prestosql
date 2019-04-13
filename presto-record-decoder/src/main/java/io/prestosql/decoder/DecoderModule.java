@@ -16,6 +16,8 @@ package io.prestosql.decoder;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.multibindings.MapBinder;
+import com.twitter.presto.decoder.thrift.ThriftRowDecoder;
+import com.twitter.presto.decoder.thrift.ThriftRowDecoderFactory;
 import io.prestosql.decoder.avro.AvroRowDecoder;
 import io.prestosql.decoder.avro.AvroRowDecoderFactory;
 import io.prestosql.decoder.csv.CsvRowDecoder;
@@ -44,6 +46,7 @@ public class DecoderModule
         decoderFactoriesByName.addBinding(JsonRowDecoder.NAME).to(JsonRowDecoderFactory.class).in(SINGLETON);
         decoderFactoriesByName.addBinding(RawRowDecoder.NAME).to(RawRowDecoderFactory.class).in(SINGLETON);
         decoderFactoriesByName.addBinding(AvroRowDecoder.NAME).to(AvroRowDecoderFactory.class).in(SINGLETON);
+        decoderFactoriesByName.addBinding(ThriftRowDecoder.NAME).to(ThriftRowDecoderFactory.class).in(SINGLETON);
 
         binder.bind(DispatchingRowDecoderFactory.class).in(SINGLETON);
     }
