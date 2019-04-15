@@ -27,12 +27,13 @@ public class GatewayModule
     protected void setup(Binder binder)
     {
         jaxrsBinder(binder).bind(GatewayResource.class);
+        jaxrsBinder(binder).bind(ClusterManagerResource.class);
         configBinder(binder).bindConfig(GatewayConfig.class);
 
         GatewayConfig.ClusterManagerType type = buildConfigObject(GatewayConfig.class).getClusterManagerType();
         switch (type) {
             case STATIC:
-                binder.bind(ClusterManager.class).to(StaticRandomClusterManager.class).in(Scopes.SINGLETON);
+                binder.bind(ClusterManager.class).to(StaticClusterManager.class).in(Scopes.SINGLETON);
                 break;
             default:
                 throw new AssertionError("Unsupported cluster manager type: " + type);

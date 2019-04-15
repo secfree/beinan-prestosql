@@ -14,8 +14,15 @@
 package com.twitter.presto.gateway;
 
 import java.net.URI;
+import java.util.List;
 
 public interface ClusterManager
 {
     URI getPrestoCluster(RequestInfo request);
+
+    List<URI> getAllClusters();
+
+    boolean addPrestoCluster(URI cluster);
+
+    boolean removePrestoCluster(URI cluster);
 }

@@ -17,7 +17,6 @@ import com.google.inject.Inject;
 import io.airlift.log.Logger;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -41,13 +40,6 @@ public class GatewayResource
     public GatewayResource(ClusterManager clusterManager)
     {
         this.clusterManager = requireNonNull(clusterManager, "clusterManager is null");
-    }
-
-    @GET
-    @Path("/v1/gateway")
-    public String getGateInfo()
-    {
-        return "hello world";
     }
 
     @POST

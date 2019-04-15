@@ -44,8 +44,9 @@ import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterrup
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
-public class TestStaticRandomClusterManager
+public class TestStaticClusterManager
 {
     private static final int NUM_CLUSTERS = 2;
     private static final int NUM_QUERIES = 7;
@@ -127,12 +128,15 @@ public class TestStaticRandomClusterManager
                     Statement statement = connection.createStatement();
                     ResultSet rs = statement.executeQuery(sql)) {
                 String id = rs.unwrap(PrestoResultSet.class).getQueryId();
+                int count = 0;
                 while (rs.next()) {
                     if (!rs.getString("query_id").equals(id)) {
                         assertEquals(QueryState.valueOf(rs.getString("state")), QueryState.FINISHED);
-                        total++;
+                        count++;
                     }
                 }
+                assertTrue(count > 0);
+                total += count;
             }
         }
         assertEquals(total, NUM_QUERIES);
