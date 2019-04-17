@@ -28,6 +28,7 @@ public class TestGatewayConfig
     public void testDefaults()
     {
         assertRecordedDefaults(recordDefaults(GatewayConfig.class)
+                .setVersion(null)
                 .setClusterManagerType(null)
                 .setClusters(null));
     }
@@ -36,11 +37,13 @@ public class TestGatewayConfig
     public void testExplicitPropertyMappings()
     {
         Map<String, String> properties = new ImmutableMap.Builder<String, String>()
+                .put("gateway.version", "testversion")
                 .put("gateway.cluster-manager.type", "STATIC")
                 .put("gateway.cluster-manager.static.cluster-list", "http://example.net/,http://twitter.com/")
                 .build();
 
         GatewayConfig expected = new GatewayConfig()
+                .setVersion("testversion")
                 .setClusterManagerType("STATIC")
                 .setClusters("http://example.net/,http://twitter.com/");
 
