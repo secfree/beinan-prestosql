@@ -15,6 +15,7 @@ package com.twitter.presto.gateway;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
+import com.twitter.presto.gateway.cluster.QueryInfoTracker;
 import io.airlift.bootstrap.Bootstrap;
 import io.airlift.bootstrap.LifeCycleManager;
 import io.airlift.http.server.HttpServerInfo;
@@ -54,6 +55,7 @@ public class TestStaticClusterManager
     private List<TestingPrestoServer> prestoServers;
     private LifeCycleManager lifeCycleManager;
     private HttpServerInfo httpServerInfo;
+    private QueryInfoTracker queryInfoTracker;
 
     @BeforeClass
     public void setupServer()
@@ -76,6 +78,7 @@ public class TestStaticClusterManager
         Injector injector = app
                 .strictConfig()
                 .doNotInitializeLogging()
+                .setRequiredConfigurationProperty("gateway.version", "testversion")
                 .setRequiredConfigurationProperty("gateway.cluster-manager.type", "STATIC")
                 .setRequiredConfigurationProperty("gateway.cluster-manager.static.cluster-list", getClusterList(prestoServers))
                 .quiet()
@@ -83,6 +86,7 @@ public class TestStaticClusterManager
 
         lifeCycleManager = injector.getInstance(LifeCycleManager.class);
         httpServerInfo = injector.getInstance(HttpServerInfo.class);
+        queryInfoTracker = injector.getInstance(QueryInfoTracker.class);
     }
 
     @AfterClass(alwaysRun = true)
@@ -116,6 +120,8 @@ public class TestStaticClusterManager
 
         sleepUninterruptibly(10, SECONDS);
         assertQueryState();
+        while (true) {}
+//        assertEquals(queryInfoTracker.getAllQueryInfos().size(), NUM_QUERIES + NUM_CLUSTERS);
     }
 
     private void assertQueryState()

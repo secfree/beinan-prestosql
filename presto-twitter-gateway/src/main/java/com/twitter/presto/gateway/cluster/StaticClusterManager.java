@@ -11,10 +11,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.twitter.presto.gateway;
+package com.twitter.presto.gateway.cluster;
 
 import com.google.common.collect.Iterators;
 import com.google.inject.Inject;
+import com.twitter.presto.gateway.ClusterManager;
+import com.twitter.presto.gateway.GatewayConfig;
+import com.twitter.presto.gateway.RequestInfo;
 
 import javax.annotation.concurrent.GuardedBy;
 

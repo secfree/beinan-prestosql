@@ -14,6 +14,7 @@
 package com.twitter.presto.gateway;
 
 import com.google.inject.Inject;
+import com.twitter.presto.gateway.cluster.ClusterStatusResource;
 import io.airlift.log.Logger;
 
 import javax.ws.rs.GET;
@@ -31,10 +32,10 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
-@Path("/v1/clusters")
+@Path("/v1/gateway/managers")
 public class ClusterManagerResource
 {
-    private static final Logger log = Logger.get(GatewayResource.class);
+    private static final Logger log = Logger.get(ClusterStatusResource.class);
 
     private final ClusterManager clusterManager;
 

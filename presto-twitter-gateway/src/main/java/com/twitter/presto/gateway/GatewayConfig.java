@@ -29,12 +29,26 @@ public class GatewayConfig
 {
     private static final Splitter SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
 
+    private String version = getClass().getPackage().getImplementationVersion();
     private ClusterManagerType clusterManagerType;
     private List<URI> clusters;
 
     public enum ClusterManagerType
     {
         STATIC
+    }
+
+    @NotNull(message = "Gateway version cannot be automatically determined")
+    public String getVersion()
+    {
+        return version;
+    }
+
+    @Config("gateway.version")
+    public GatewayConfig setVersion(String version)
+    {
+        this.version = version;
+        return this;
     }
 
     @NotNull
