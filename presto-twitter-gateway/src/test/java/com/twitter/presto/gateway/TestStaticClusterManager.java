@@ -119,9 +119,8 @@ public class TestStaticClusterManager
         }
 
         sleepUninterruptibly(10, SECONDS);
+        assertEquals(queryInfoTracker.getAllQueryInfos().size(), NUM_QUERIES);
         assertQueryState();
-        while (true) {}
-//        assertEquals(queryInfoTracker.getAllQueryInfos().size(), NUM_QUERIES + NUM_CLUSTERS);
     }
 
     private void assertQueryState()

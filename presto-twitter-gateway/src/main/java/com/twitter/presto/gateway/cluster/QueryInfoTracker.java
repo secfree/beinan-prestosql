@@ -13,9 +13,8 @@
  */
 package com.twitter.presto.gateway.cluster;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.twitter.presto.gateway.ClusterManager;
@@ -77,38 +76,13 @@ public class QueryInfoTracker
         remoteQueryInfos.values().forEach(RemoteQueryInfo::asyncRefresh);
     }
 
-    public List<QueryStatus> getAllQueryInfos()
+    public List<JsonNode> getAllQueryInfos()
     {
-        ImmutableList.Builder<QueryStatus> builder = ImmutableList.builder();
+        ImmutableList.Builder<JsonNode> builder = ImmutableList.builder();
         remoteQueryInfos.forEach((coordinator, remoteQueryInfo) ->
                 builder.addAll(remoteQueryInfo.getQueryList().orElse(ImmutableList.of()).stream()
-                        .map(queryInfo -> new QueryStatus(coordinator, queryInfo))
+                        .map(queryInfo -> ((ObjectNode) queryInfo).put("coordinatorUri", coordinator))
                         .collect(toImmutableList())));
         return builder.build();
-    }
-
-    public static class QueryStatus
-    {
-        private String coordinatorUri;
-        private JsonNode queryInfo;
-
-        @JsonCreator
-        public QueryStatus(@JsonProperty("coordinatorUri") String coordinatorUri, @JsonProperty("queryInfo") JsonNode queryInfo)
-        {
-            this.coordinatorUri = requireNonNull(coordinatorUri, "coordinatorUri is null");
-            this.queryInfo = requireNonNull(queryInfo, "queryInfo is null");
-        }
-
-        @JsonProperty
-        public String getCoordinatorUri()
-        {
-            return coordinatorUri;
-        }
-
-        @JsonProperty
-        public JsonNode getQueryInfo()
-        {
-            return queryInfo;
-        }
     }
 }

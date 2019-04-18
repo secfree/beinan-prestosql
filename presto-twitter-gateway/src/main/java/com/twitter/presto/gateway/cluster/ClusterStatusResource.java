@@ -15,6 +15,7 @@ package com.twitter.presto.gateway.cluster;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.twitter.presto.gateway.ClusterManager;
 import io.airlift.log.Logger;
@@ -30,7 +31,6 @@ import javax.ws.rs.QueryParam;
 import java.util.List;
 import java.util.Optional;
 
-import static com.twitter.presto.gateway.cluster.QueryInfoTracker.QueryStatus;
 import static java.util.Objects.requireNonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -74,7 +74,7 @@ public class ClusterStatusResource
 
     @GET
     @Path("/v1/query")
-    public List<QueryStatus> getAllQueryInfo(@QueryParam("state") String stateFilter)
+    public List<JsonNode> getAllQueryInfo(@QueryParam("state") String stateFilter)
     {
         return queryInfoTracker.getAllQueryInfos();
     }
