@@ -177,5 +177,11 @@
             <artifactId>presto-jdbc</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+            <version>4.2.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>

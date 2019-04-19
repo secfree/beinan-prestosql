@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
@@ -29,6 +30,8 @@ import java.net.URI;
 import static io.airlift.http.client.HttpUriBuilder.uriBuilderFrom;
 import static java.util.Objects.requireNonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
+import static javax.ws.rs.core.Response.Status.BAD_GATEWAY;
 
 @Path("/")
 public class GatewayResource
@@ -49,8 +52,18 @@ public class GatewayResource
     public Response routeQuery(String statement, @Context HttpServletRequest servletRequest)
     {
         RequestInfo requestInfo = new RequestInfo(servletRequest, statement);
-        URI destination = uriBuilderFrom(clusterManager.getPrestoCluster(requestInfo)).replacePath("/v1/statement").build();
-        log.info("route query to %s", destination);
-        return Response.temporaryRedirect(destination).build();
+        URI coordinatorUri = clusterManager.getPrestoCluster(requestInfo).orElseThrow(() -> badRequest(BAD_GATEWAY, "No active server available"));
+        URI statementUri = uriBuilderFrom(coordinatorUri).replacePath("/v1/statement").build();
+        log.info("route query to %s", statementUri);
+        return Response.temporaryRedirect(statementUri).build();
+    }
+
+    private static WebApplicationException badRequest(Response.Status status, String message)
+    {
+        throw new WebApplicationException(
+                Response.status(status)
+                        .type(TEXT_PLAIN_TYPE)
+                        .entity(message)
+                        .build());
     }
 }

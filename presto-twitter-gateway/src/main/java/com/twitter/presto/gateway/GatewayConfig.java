@@ -32,10 +32,13 @@ public class GatewayConfig
     private String version = getClass().getPackage().getImplementationVersion();
     private ClusterManagerType clusterManagerType;
     private List<URI> clusters;
+    private String zookeeperUri;
+    private String zookeeperPath;
 
     public enum ClusterManagerType
     {
-        STATIC
+        STATIC,
+        SERVERSET
     }
 
     @NotNull(message = "Gateway version cannot be automatically determined")
@@ -87,6 +90,32 @@ public class GatewayConfig
         this.clusters = stream(SPLITTER.split(clusterList))
                 .map(URI::create)
                 .collect(toImmutableList());
+        return this;
+    }
+
+    public String getZookeeperUri()
+    {
+        return zookeeperUri;
+    }
+
+    @Config("gateway.cluster-manager.zookeeper.uri")
+    @ConfigDescription("Server set Zookeeper URI")
+    public GatewayConfig setZookeeperUri(String zookeeperUri)
+    {
+        this.zookeeperUri = zookeeperUri;
+        return this;
+    }
+
+    public String getZookeeperPath()
+    {
+        return zookeeperPath;
+    }
+
+    @Config("gateway.cluster-manager.zookeeper.path")
+    @ConfigDescription("Server set Zookeeper path")
+    public GatewayConfig setZookeeperPath(String zkPath)
+    {
+        this.zookeeperPath = zkPath;
         return this;
     }
 }

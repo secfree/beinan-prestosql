@@ -23,6 +23,7 @@ import javax.annotation.concurrent.GuardedBy;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -45,9 +46,9 @@ public class StaticClusterManager
     }
 
     @Override
-    public URI getPrestoCluster(RequestInfo request)
+    public Optional<URI> getPrestoCluster(RequestInfo request)
     {
-        return iterator.next();
+        return Optional.of(iterator.next());
     }
 
     @Override

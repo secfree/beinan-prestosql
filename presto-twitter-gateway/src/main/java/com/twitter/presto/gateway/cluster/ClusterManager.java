@@ -17,10 +17,11 @@ import com.twitter.presto.gateway.RequestInfo;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 public interface ClusterManager
 {
-    URI getPrestoCluster(RequestInfo request);
+    Optional<URI> getPrestoCluster(RequestInfo request);
 
     List<URI> getAllClusters();
 }

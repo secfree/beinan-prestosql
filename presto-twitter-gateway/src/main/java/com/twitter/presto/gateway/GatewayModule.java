@@ -20,6 +20,7 @@ import com.twitter.presto.gateway.cluster.ClusterManagerResource;
 import com.twitter.presto.gateway.cluster.ClusterStatusResource;
 import com.twitter.presto.gateway.cluster.ForQueryTracker;
 import com.twitter.presto.gateway.cluster.QueryInfoTracker;
+import com.twitter.presto.gateway.cluster.ServerSetClusterManager;
 import com.twitter.presto.gateway.cluster.StaticClusterManager;
 import io.airlift.configuration.AbstractConfigurationAwareModule;
 import io.airlift.units.Duration;
@@ -44,6 +45,9 @@ public class GatewayModule
         switch (type) {
             case STATIC:
                 binder.bind(ClusterManager.class).to(StaticClusterManager.class).in(Scopes.SINGLETON);
+                break;
+            case SERVERSET:
+                binder.bind(ClusterManager.class).to(ServerSetClusterManager.class).in(Scopes.SINGLETON);
                 break;
             default:
                 throw new AssertionError("Unsupported cluster manager type: " + type);
