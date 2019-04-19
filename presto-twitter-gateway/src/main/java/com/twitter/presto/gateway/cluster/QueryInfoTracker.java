@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import com.twitter.presto.gateway.ClusterManager;
 import io.airlift.http.client.HttpClient;
 import io.airlift.log.Logger;
 

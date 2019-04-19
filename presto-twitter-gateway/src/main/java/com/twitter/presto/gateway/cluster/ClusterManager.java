@@ -11,7 +11,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.twitter.presto.gateway;
+package com.twitter.presto.gateway.cluster;
+
+import com.twitter.presto.gateway.RequestInfo;
 
 import java.net.URI;
 import java.util.List;
@@ -21,8 +23,4 @@ public interface ClusterManager
     URI getPrestoCluster(RequestInfo request);
 
     List<URI> getAllClusters();
-
-    boolean addPrestoCluster(URI cluster);
-
-    boolean removePrestoCluster(URI cluster);
 }

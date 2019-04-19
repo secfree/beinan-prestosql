@@ -17,7 +17,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
-import com.twitter.presto.gateway.ClusterManager;
 import io.airlift.log.Logger;
 import io.prestosql.client.NodeVersion;
 import io.prestosql.client.ServerInfo;

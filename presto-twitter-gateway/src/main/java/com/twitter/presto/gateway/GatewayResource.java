@@ -14,6 +14,7 @@
 package com.twitter.presto.gateway;
 
 import com.google.inject.Inject;
+import com.twitter.presto.gateway.cluster.ClusterManager;
 import io.airlift.log.Logger;
 
 import javax.servlet.http.HttpServletRequest;

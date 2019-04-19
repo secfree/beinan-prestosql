@@ -15,7 +15,6 @@ package com.twitter.presto.gateway.cluster;
 
 import com.google.common.collect.Iterators;
 import com.google.inject.Inject;
-import com.twitter.presto.gateway.ClusterManager;
 import com.twitter.presto.gateway.GatewayConfig;
 import com.twitter.presto.gateway.RequestInfo;
 
@@ -55,27 +54,5 @@ public class StaticClusterManager
     public List<URI> getAllClusters()
     {
         return clusters.stream().collect(toImmutableList());
-    }
-
-    @Override
-    public boolean addPrestoCluster(URI cluster)
-    {
-        boolean status = this.clusters.add(cluster);
-        if (status) {
-            this.iterator = Iterators.cycle(this.clusters);
-        }
-
-        return status;
-    }
-
-    @Override
-    public boolean removePrestoCluster(URI cluster)
-    {
-        boolean status = this.clusters.remove(cluster);
-        if (status) {
-            this.iterator = Iterators.cycle(this.clusters);
-        }
-
-        return status;
     }
 }

@@ -15,6 +15,8 @@ package com.twitter.presto.gateway;
 
 import com.google.inject.Binder;
 import com.google.inject.Scopes;
+import com.twitter.presto.gateway.cluster.ClusterManager;
+import com.twitter.presto.gateway.cluster.ClusterManagerResource;
 import com.twitter.presto.gateway.cluster.ClusterStatusResource;
 import com.twitter.presto.gateway.cluster.ForQueryTracker;
 import com.twitter.presto.gateway.cluster.QueryInfoTracker;
