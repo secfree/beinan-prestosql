@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import io.airlift.log.Logger;
+import io.airlift.node.NodeInfo;
 import io.prestosql.client.NodeVersion;
 import io.prestosql.client.ServerInfo;
 
@@ -38,19 +39,15 @@ public class ClusterStatusResource
 {
     private static final Logger log = Logger.get(ClusterStatusResource.class);
 
-    private final NodeVersion version;
+    private final NodeVersion nodeVersion;
     private final String environment;
-    private final ClusterManager clusterManager;
     private final ClusterStatusTracker clusterStatusTracker;
 
     @Inject
-    public ClusterStatusResource(
-            ClusterManager clusterManager,
-            ClusterStatusTracker clusterStatusTracker)
+    public ClusterStatusResource(NodeVersion nodeVersion, NodeInfo nodeInfo, ClusterStatusTracker clusterStatusTracker)
     {
-        this.version = new NodeVersion("test");
-        this.environment = "test";
-        this.clusterManager = requireNonNull(clusterManager, "clusterManager is null");
+        this.nodeVersion = requireNonNull(nodeVersion, "nodeVersion is null");
+        this.environment = requireNonNull(nodeInfo, "nodeInfo is null").getEnvironment();
         this.clusterStatusTracker = requireNonNull(clusterStatusTracker, "clusterStatusTracker is null");
     }
 
@@ -60,7 +57,7 @@ public class ClusterStatusResource
     @Produces(APPLICATION_JSON)
     public ServerInfo getInfo()
     {
-        return new ServerInfo(version, environment, true, false, Optional.empty());
+        return new ServerInfo(nodeVersion, environment, true, false, Optional.empty());
     }
 
     @GET
@@ -68,7 +65,11 @@ public class ClusterStatusResource
     @Produces(APPLICATION_JSON)
     public ClusterStats getClusterStats()
     {
-        return new ClusterStats(0, 0, 0, 0, 0, 0, 0, 0, 0);
+        return new ClusterStats(
+                clusterStatusTracker.getRunningQueries(),
+                clusterStatusTracker.getBlockedQueries(),
+                clusterStatusTracker.getQueuedQueries(),
+                clusterStatusTracker.getActiveWorkers());
     }
 
     @GET
@@ -84,36 +85,19 @@ public class ClusterStatusResource
         private final long runningQueries;
         private final long blockedQueries;
         private final long queuedQueries;
-
         private final long activeWorkers;
-        private final long runningDrivers;
-        private final double reservedMemory;
-
-        private final long totalInputRows;
-        private final long totalInputBytes;
-        private final long totalCpuTimeSecs;
 
         @JsonCreator
         public ClusterStats(
                 @JsonProperty("runningQueries") long runningQueries,
                 @JsonProperty("blockedQueries") long blockedQueries,
                 @JsonProperty("queuedQueries") long queuedQueries,
-                @JsonProperty("activeWorkers") long activeWorkers,
-                @JsonProperty("runningDrivers") long runningDrivers,
-                @JsonProperty("reservedMemory") double reservedMemory,
-                @JsonProperty("totalInputRows") long totalInputRows,
-                @JsonProperty("totalInputBytes") long totalInputBytes,
-                @JsonProperty("totalCpuTimeSecs") long totalCpuTimeSecs)
+                @JsonProperty("activeWorkers") long activeWorkers)
         {
             this.runningQueries = runningQueries;
             this.blockedQueries = blockedQueries;
             this.queuedQueries = queuedQueries;
             this.activeWorkers = activeWorkers;
-            this.runningDrivers = runningDrivers;
-            this.reservedMemory = reservedMemory;
-            this.totalInputRows = totalInputRows;
-            this.totalInputBytes = totalInputBytes;
-            this.totalCpuTimeSecs = totalCpuTimeSecs;
         }
 
         @JsonProperty
@@ -138,36 +122,6 @@ public class ClusterStatusResource
         public long getActiveWorkers()
         {
             return activeWorkers;
-        }
-
-        @JsonProperty
-        public long getRunningDrivers()
-        {
-            return runningDrivers;
-        }
-
-        @JsonProperty
-        public double getReservedMemory()
-        {
-            return reservedMemory;
-        }
-
-        @JsonProperty
-        public long getTotalInputRows()
-        {
-            return totalInputRows;
-        }
-
-        @JsonProperty
-        public long getTotalInputBytes()
-        {
-            return totalInputBytes;
-        }
-
-        @JsonProperty
-        public long getTotalCpuTimeSecs()
-        {
-            return totalCpuTimeSecs;
         }
     }
 }

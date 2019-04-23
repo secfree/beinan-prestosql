@@ -40,12 +40,15 @@ import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 public class ClusterStatusTracker
 {
     private static final Logger log = Logger.get(ClusterStatusTracker.class);
+    private static final String QUERY_INFO = "/v1/query";
+    private static final String CLUSTER_INFO = "/v1/cluster";
 
     private final ClusterManager clusterManager;
     private final HttpClient httpClient;
     private final ScheduledExecutorService queryInfoUpdateExecutor;
 
     // Cluster status
+    private final ConcurrentHashMap<URI, RemoteClusterInfo> remoteClusterInfos = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<URI, RemoteQueryInfo> remoteQueryInfos = new ConcurrentHashMap<>();
 
     @Inject
@@ -62,7 +65,10 @@ public class ClusterStatusTracker
     public void startPollingQueryInfo()
     {
         clusterManager.getAllClusters().stream()
-                .forEach(uri -> remoteQueryInfos.put(uri, createRemoteQueryInfo(uri)));
+                .forEach(uri -> {
+                    remoteClusterInfos.put(uri, createRemoteClusterInfo(uri));
+                    remoteQueryInfos.put(uri, createRemoteQueryInfo(uri));
+                });
 
         queryInfoUpdateExecutor.scheduleWithFixedDelay(() -> {
             try {
@@ -83,9 +89,41 @@ public class ClusterStatusTracker
         remoteQueryInfos.keySet().removeAll(inactiveClusters);
 
         allClusters.stream()
-                .forEach(uri -> remoteQueryInfos.putIfAbsent(uri, createRemoteQueryInfo(uri)));
+                .forEach(uri -> {
+                    remoteClusterInfos.putIfAbsent(uri, createRemoteClusterInfo(uri));
+                    remoteQueryInfos.putIfAbsent(uri, createRemoteQueryInfo(uri));
+                });
 
+        remoteClusterInfos.values().forEach(RemoteClusterInfo::asyncRefresh);
         remoteQueryInfos.values().forEach(RemoteQueryInfo::asyncRefresh);
+    }
+
+    public long getRunningQueries()
+    {
+        return remoteClusterInfos.values().stream()
+                .mapToLong(RemoteClusterInfo::getRunningQueries)
+                .sum();
+    }
+
+    public long getBlockedQueries()
+    {
+        return remoteClusterInfos.values().stream()
+                .mapToLong(RemoteClusterInfo::getBlockedQueries)
+                .sum();
+    }
+
+    public long getQueuedQueries()
+    {
+        return remoteClusterInfos.values().stream()
+                .mapToLong(RemoteClusterInfo::getQueuedQueries)
+                .sum();
+    }
+
+    public long getActiveWorkers()
+    {
+        return remoteClusterInfos.values().stream()
+                .mapToLong(RemoteClusterInfo::getActiveWorkers)
+                .sum();
     }
 
     public List<JsonNode> getAllQueryInfos()
@@ -100,6 +138,11 @@ public class ClusterStatusTracker
 
     private RemoteQueryInfo createRemoteQueryInfo(URI uri)
     {
-        return new RemoteQueryInfo(httpClient, uriBuilderFrom(uri).appendPath("/v1/query").build());
+        return new RemoteQueryInfo(httpClient, uriBuilderFrom(uri).appendPath(QUERY_INFO).build());
+    }
+
+    private RemoteClusterInfo createRemoteClusterInfo(URI uri)
+    {
+        return new RemoteClusterInfo(httpClient, uriBuilderFrom(uri).appendPath(CLUSTER_INFO).build());
     }
 }
