@@ -13,14 +13,12 @@
  */
 package com.twitter.presto.gateway.cluster;
 
-import com.twitter.presto.gateway.query.QueryCategory;
+import com.twitter.presto.gateway.RequestInfo;
 
 import java.net.URI;
-import java.util.List;
+import java.util.Optional;
 
-public interface ClusterManager
+public interface ClusterSelector
 {
-    List<URI> getAllClusters();
-
-    List<URI> getClusters(QueryCategory category);
+    Optional<URI> getPrestoCluster(RequestInfo request);
 }

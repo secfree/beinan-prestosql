@@ -17,9 +17,11 @@ import com.google.inject.Binder;
 import com.google.inject.Scopes;
 import com.twitter.presto.gateway.cluster.ClusterManager;
 import com.twitter.presto.gateway.cluster.ClusterManagerResource;
+import com.twitter.presto.gateway.cluster.ClusterSelector;
 import com.twitter.presto.gateway.cluster.ClusterStatusResource;
+import com.twitter.presto.gateway.cluster.ClusterStatusTracker;
 import com.twitter.presto.gateway.cluster.ForQueryTracker;
-import com.twitter.presto.gateway.cluster.QueryInfoTracker;
+import com.twitter.presto.gateway.cluster.RandomSelector;
 import com.twitter.presto.gateway.cluster.ServerSetClusterManager;
 import com.twitter.presto.gateway.cluster.StaticClusterManager;
 import io.airlift.configuration.AbstractConfigurationAwareModule;
@@ -39,9 +41,10 @@ public class GatewayModule
     protected void setup(Binder binder)
     {
         configBinder(binder).bindConfig(GatewayConfig.class);
+        binder.bind(ClusterSelector.class).to(RandomSelector.class).in(Scopes.SINGLETON);
+
         GatewayConfig gatewayConfig = buildConfigObject(GatewayConfig.class);
         ClusterManagerType type = buildConfigObject(GatewayConfig.class).getClusterManagerType();
-
         switch (type) {
             case STATIC:
                 binder.bind(ClusterManager.class).to(StaticClusterManager.class).in(Scopes.SINGLETON);
@@ -62,7 +65,7 @@ public class GatewayModule
         NodeVersion nodeVersion = new NodeVersion(gatewayConfig.getVersion());
         binder.bind(NodeVersion.class).toInstance(nodeVersion);
 
-        binder.bind(QueryInfoTracker.class).in(Scopes.SINGLETON);
+        binder.bind(ClusterStatusTracker.class).in(Scopes.SINGLETON);
 
         jaxrsBinder(binder).bind(GatewayResource.class);
         jaxrsBinder(binder).bind(ClusterManagerResource.class);

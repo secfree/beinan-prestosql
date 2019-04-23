@@ -14,7 +14,7 @@
 package com.twitter.presto.gateway;
 
 import com.google.inject.Inject;
-import com.twitter.presto.gateway.cluster.ClusterManager;
+import com.twitter.presto.gateway.cluster.ClusterSelector;
 import io.airlift.log.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,12 +38,12 @@ public class GatewayResource
 {
     private static final Logger log = Logger.get(GatewayResource.class);
 
-    private final ClusterManager clusterManager;
+    private final ClusterSelector clusterSelector;
 
     @Inject
-    public GatewayResource(ClusterManager clusterManager)
+    public GatewayResource(ClusterSelector clusterSelector)
     {
-        this.clusterManager = requireNonNull(clusterManager, "clusterManager is null");
+        this.clusterSelector = requireNonNull(clusterSelector, "clusterSelector is null");
     }
 
     @POST
@@ -52,7 +52,7 @@ public class GatewayResource
     public Response routeQuery(String statement, @Context HttpServletRequest servletRequest)
     {
         RequestInfo requestInfo = new RequestInfo(servletRequest, statement);
-        URI coordinatorUri = clusterManager.getPrestoCluster(requestInfo).orElseThrow(() -> badRequest(BAD_GATEWAY, "No active server available"));
+        URI coordinatorUri = clusterSelector.getPrestoCluster(requestInfo).orElseThrow(() -> badRequest(BAD_GATEWAY, "No active server available"));
         URI statementUri = uriBuilderFrom(coordinatorUri).replacePath("/v1/statement").build();
         log.info("route query to %s", statementUri);
         return Response.temporaryRedirect(statementUri).build();

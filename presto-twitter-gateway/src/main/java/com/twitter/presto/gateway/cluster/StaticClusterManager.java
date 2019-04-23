@@ -13,47 +13,47 @@
  */
 package com.twitter.presto.gateway.cluster;
 
-import com.google.common.collect.Iterators;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.twitter.presto.gateway.GatewayConfig;
-import com.twitter.presto.gateway.RequestInfo;
-
-import javax.annotation.concurrent.GuardedBy;
+import com.twitter.presto.gateway.query.QueryCategory;
 
 import java.net.URI;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.Map;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static java.util.stream.Collectors.toSet;
+import static com.twitter.presto.gateway.query.QueryCategory.BATCH;
+import static com.twitter.presto.gateway.query.QueryCategory.INTERACTIVE;
+import static com.twitter.presto.gateway.query.QueryCategory.REALTIME;
 
 public class StaticClusterManager
         implements ClusterManager
 {
-    @GuardedBy("this")
-    private Set<URI> clusters;
-
-    @GuardedBy("this")
-    private Iterator<URI> iterator;
+    private final Map<QueryCategory, List<URI>> clusters;
 
     @Inject
     public StaticClusterManager(GatewayConfig config)
     {
-        clusters = config.getClusters().stream().collect(toSet());
-        iterator = Iterators.cycle(clusters);
-    }
-
-    @Override
-    public Optional<URI> getPrestoCluster(RequestInfo request)
-    {
-        return Optional.of(iterator.next());
+        clusters = ImmutableMap.<QueryCategory, List<URI>>builder()
+                .put(REALTIME, config.getClusters())
+                .put(INTERACTIVE, config.getClusters())
+                .put(BATCH, config.getClusters())
+                .build();
     }
 
     @Override
     public List<URI> getAllClusters()
     {
-        return clusters.stream().collect(toImmutableList());
+        return clusters.values().stream()
+                .flatMap(List::stream)
+                .distinct()
+                .collect(toImmutableList());
+    }
+
+    @Override
+    public List<URI> getClusters(QueryCategory category)
+    {
+        return clusters.get(category);
     }
 }

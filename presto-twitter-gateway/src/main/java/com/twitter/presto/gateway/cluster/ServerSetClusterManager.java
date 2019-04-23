@@ -13,11 +13,9 @@
  */
 package com.twitter.presto.gateway.cluster;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.net.HostAndPort;
 import com.twitter.presto.gateway.GatewayConfig;
-import com.twitter.presto.gateway.RequestInfo;
 import com.twitter.presto.gateway.query.QueryCategory;
 import io.prestosql.spi.resourcegroups.QueryType;
 import io.prestosql.sql.tree.AddColumn;
@@ -80,7 +78,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
-import static com.twitter.presto.gateway.query.QueryClassifier.classify;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 public class ServerSetClusterManager
         implements ClusterManager
@@ -99,25 +97,22 @@ public class ServerSetClusterManager
     }
 
     @Override
-    public Optional<URI> getPrestoCluster(RequestInfo request)
+    public List<URI> getAllClusters()
     {
-        QueryCategory category = classify(request);
-        List<HostAndPort> servers = monitors.get(category).getServers();
-        if (servers.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(createUri(pickRandom(servers)));
+        return monitors.values().stream()
+                .map(ServerSetMonitor::getServers)
+                .flatMap(List::stream)
+                .distinct()
+                .map(hostAndPort -> createUri(hostAndPort))
+                .collect(toImmutableList());
     }
 
     @Override
-    public List<URI> getAllClusters()
+    public List<URI> getClusters(QueryCategory category)
     {
-        ImmutableList.Builder<URI> builder = ImmutableList.builder();
-        for (ServerSetMonitor monitor : monitors.values()) {
-            monitor.getServers().stream()
-                    .forEach(server -> builder.add(URI.create(server.toString())));
-        }
-        return builder.build();
+        return monitors.get(category).getServers().stream()
+                .map(hostAndPort -> createUri(hostAndPort))
+                .collect(toImmutableList());
     }
 
     private static ServerSetMonitor createServerSetMonitor(QueryCategory category, String zookeeperUri, String rootPath)
@@ -203,12 +198,6 @@ public class ServerSetClusterManager
         {
             return statement instanceof StartTransaction || statement instanceof Commit || statement instanceof Rollback;
         }
-    }
-
-    private static <T> T pickRandom(List<T> items)
-    {
-        int index = random.nextInt(items.size());
-        return items.get(index);
     }
 
     private static URI createUri(HostAndPort hostAndPort)

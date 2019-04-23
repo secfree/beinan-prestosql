@@ -41,17 +41,17 @@ public class ClusterStatusResource
     private final NodeVersion version;
     private final String environment;
     private final ClusterManager clusterManager;
-    private final QueryInfoTracker queryInfoTracker;
+    private final ClusterStatusTracker clusterStatusTracker;
 
     @Inject
     public ClusterStatusResource(
             ClusterManager clusterManager,
-            QueryInfoTracker queryInfoTracker)
+            ClusterStatusTracker clusterStatusTracker)
     {
         this.version = new NodeVersion("test");
         this.environment = "test";
         this.clusterManager = requireNonNull(clusterManager, "clusterManager is null");
-        this.queryInfoTracker = requireNonNull(queryInfoTracker, "queryInfoTracker is null");
+        this.clusterStatusTracker = requireNonNull(clusterStatusTracker, "clusterStatusTracker is null");
     }
 
     // The web UI depend on the following service endpoints.
@@ -75,7 +75,7 @@ public class ClusterStatusResource
     @Path("/v1/query")
     public List<JsonNode> getAllQueryInfo(@QueryParam("state") String stateFilter)
     {
-        return queryInfoTracker.getAllQueryInfos();
+        return clusterStatusTracker.getAllQueryInfos();
     }
 
     @Immutable

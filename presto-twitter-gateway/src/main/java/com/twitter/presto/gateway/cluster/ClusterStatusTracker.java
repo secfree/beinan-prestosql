@@ -22,28 +22,34 @@ import io.airlift.log.Logger;
 
 import javax.annotation.PostConstruct;
 
+import java.net.URI;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.Sets.difference;
+import static com.google.common.collect.Sets.newHashSet;
 import static io.airlift.concurrent.Threads.threadsNamed;
 import static io.airlift.http.client.HttpUriBuilder.uriBuilderFrom;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
-public class QueryInfoTracker
+public class ClusterStatusTracker
 {
-    private static final Logger log = Logger.get(QueryInfoTracker.class);
+    private static final Logger log = Logger.get(ClusterStatusTracker.class);
 
-    private final ConcurrentHashMap<String, RemoteQueryInfo> remoteQueryInfos = new ConcurrentHashMap<>();
     private final ClusterManager clusterManager;
     private final HttpClient httpClient;
     private final ScheduledExecutorService queryInfoUpdateExecutor;
 
+    // Cluster status
+    private final ConcurrentHashMap<URI, RemoteQueryInfo> remoteQueryInfos = new ConcurrentHashMap<>();
+
     @Inject
-    public QueryInfoTracker(
+    public ClusterStatusTracker(
             ClusterManager clusterManager,
             @ForQueryTracker HttpClient httpClient)
     {
@@ -56,7 +62,7 @@ public class QueryInfoTracker
     public void startPollingQueryInfo()
     {
         clusterManager.getAllClusters().stream()
-                .forEach(uri -> remoteQueryInfos.put(uri.toASCIIString(), new RemoteQueryInfo(httpClient, uriBuilderFrom(uri).appendPath("/v1/query").build())));
+                .forEach(uri -> remoteQueryInfos.put(uri, createRemoteQueryInfo(uri)));
 
         queryInfoUpdateExecutor.scheduleWithFixedDelay(() -> {
             try {
@@ -72,6 +78,13 @@ public class QueryInfoTracker
 
     private void pollQueryInfos()
     {
+        Set<URI> allClusters = newHashSet(clusterManager.getAllClusters());
+        Set<URI> inactiveClusters = difference(remoteQueryInfos.keySet(), allClusters).immutableCopy();
+        remoteQueryInfos.keySet().removeAll(inactiveClusters);
+
+        allClusters.stream()
+                .forEach(uri -> remoteQueryInfos.putIfAbsent(uri, createRemoteQueryInfo(uri)));
+
         remoteQueryInfos.values().forEach(RemoteQueryInfo::asyncRefresh);
     }
 
@@ -80,8 +93,13 @@ public class QueryInfoTracker
         ImmutableList.Builder<JsonNode> builder = ImmutableList.builder();
         remoteQueryInfos.forEach((coordinator, remoteQueryInfo) ->
                 builder.addAll(remoteQueryInfo.getQueryList().orElse(ImmutableList.of()).stream()
-                        .map(queryInfo -> ((ObjectNode) queryInfo).put("coordinatorUri", coordinator))
+                        .map(queryInfo -> ((ObjectNode) queryInfo).put("coordinatorUri", coordinator.toASCIIString()))
                         .collect(toImmutableList())));
         return builder.build();
+    }
+
+    private RemoteQueryInfo createRemoteQueryInfo(URI uri)
+    {
+        return new RemoteQueryInfo(httpClient, uriBuilderFrom(uri).appendPath("/v1/query").build());
     }
 }
