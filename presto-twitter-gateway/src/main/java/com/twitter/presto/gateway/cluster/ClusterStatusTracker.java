@@ -119,10 +119,22 @@ public class ClusterStatusTracker
                 .sum();
     }
 
+    public long getClusterCount()
+    {
+        return remoteClusterInfos.entrySet().size();
+    }
+
     public long getActiveWorkers()
     {
         return remoteClusterInfos.values().stream()
                 .mapToLong(RemoteClusterInfo::getActiveWorkers)
+                .sum();
+    }
+
+    public long getRunningDrivers()
+    {
+        return remoteClusterInfos.values().stream()
+                .mapToLong(RemoteClusterInfo::getRunningDrivers)
                 .sum();
     }
 

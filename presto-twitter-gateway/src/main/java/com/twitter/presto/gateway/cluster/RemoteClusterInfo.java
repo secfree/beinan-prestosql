@@ -31,11 +31,13 @@ public class RemoteClusterInfo
     private static final String BLOCKED_QUERIES = "blockedQueries";
     private static final String QUEUED_QUERIES = "queuedQueries";
     private static final String ACTIVE_WORKERS = "activeWorkers";
+    private static final String RUNNING_DRIVERS = "runningDrivers";
 
     private final AtomicLong runningQueries = new AtomicLong();
     private final AtomicLong blockedQueries = new AtomicLong();
     private final AtomicLong queuedQueries = new AtomicLong();
     private final AtomicLong activeWorkers = new AtomicLong();
+    private final AtomicLong runningDrivers = new AtomicLong();
 
     public RemoteClusterInfo(HttpClient httpClient, URI remoteUri)
     {
@@ -49,6 +51,7 @@ public class RemoteClusterInfo
         blockedQueries.set(fields.get(BLOCKED_QUERIES));
         queuedQueries.set(fields.get(QUEUED_QUERIES));
         activeWorkers.set(fields.get(ACTIVE_WORKERS));
+        runningDrivers.set(fields.get(RUNNING_DRIVERS));
     }
 
     public long getRunningQueries()
@@ -69,5 +72,10 @@ public class RemoteClusterInfo
     public long getActiveWorkers()
     {
         return activeWorkers.get();
+    }
+
+    public long getRunningDrivers()
+    {
+        return runningDrivers.get();
     }
 }

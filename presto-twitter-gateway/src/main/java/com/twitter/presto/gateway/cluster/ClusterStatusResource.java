@@ -69,7 +69,9 @@ public class ClusterStatusResource
                 clusterStatusTracker.getRunningQueries(),
                 clusterStatusTracker.getBlockedQueries(),
                 clusterStatusTracker.getQueuedQueries(),
-                clusterStatusTracker.getActiveWorkers());
+                clusterStatusTracker.getClusterCount(),
+                clusterStatusTracker.getActiveWorkers(),
+                clusterStatusTracker.getRunningDrivers());
     }
 
     @GET
@@ -85,19 +87,25 @@ public class ClusterStatusResource
         private final long runningQueries;
         private final long blockedQueries;
         private final long queuedQueries;
+        private final long clusterCount;
         private final long activeWorkers;
+        private final long runningDrivers;
 
         @JsonCreator
         public ClusterStats(
                 @JsonProperty("runningQueries") long runningQueries,
                 @JsonProperty("blockedQueries") long blockedQueries,
                 @JsonProperty("queuedQueries") long queuedQueries,
-                @JsonProperty("activeWorkers") long activeWorkers)
+                @JsonProperty("clusterCount") long clusterCount,
+                @JsonProperty("activeWorkers") long activeWorkers,
+                @JsonProperty("runningDrivers") long runningDrivers)
         {
             this.runningQueries = runningQueries;
             this.blockedQueries = blockedQueries;
             this.queuedQueries = queuedQueries;
+            this.clusterCount = clusterCount;
             this.activeWorkers = activeWorkers;
+            this.runningDrivers = runningDrivers;
         }
 
         @JsonProperty
@@ -119,9 +127,21 @@ public class ClusterStatusResource
         }
 
         @JsonProperty
+        public long getClusterCount()
+        {
+            return clusterCount;
+        }
+
+        @JsonProperty
         public long getActiveWorkers()
         {
             return activeWorkers;
+        }
+
+        @JsonProperty
+        public long getRunningDrivers()
+        {
+            return runningDrivers;
         }
     }
 }
