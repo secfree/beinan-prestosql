@@ -1,4 +1,4 @@
-package com.twitter.presto.gateway.cluster;
+package com.twitter.presto.gateway.query;
 
 public enum QueryCategory
 {
