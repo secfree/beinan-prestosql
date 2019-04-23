@@ -19,8 +19,6 @@ import com.google.common.net.HostAndPort;
 import com.twitter.presto.gateway.GatewayConfig;
 import com.twitter.presto.gateway.RequestInfo;
 import com.twitter.presto.gateway.query.QueryCategory;
-import com.twitter.presto.gateway.query.QueryClassifier;
-import io.prestosql.spi.HostAddress;
 import io.prestosql.spi.resourcegroups.QueryType;
 import io.prestosql.sql.tree.AddColumn;
 import io.prestosql.sql.tree.Analyze;
@@ -75,9 +73,9 @@ import io.prestosql.sql.tree.Use;
 import javax.inject.Inject;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -124,7 +122,7 @@ public class ServerSetClusterManager
 
     private static ServerSetMonitor createServerSetMonitor(QueryCategory category, String zookeeperUri, String rootPath)
     {
-        return new ServerSetMonitor(zookeeperUri, rootPath + '/' + category.toString().toLowerCase());
+        return new ServerSetMonitor(zookeeperUri, rootPath + '/' + category.toString().toLowerCase(Locale.ENGLISH));
     }
 
     public static class StatementUtils
