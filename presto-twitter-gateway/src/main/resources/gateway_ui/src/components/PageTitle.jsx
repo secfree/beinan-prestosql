@@ -133,16 +133,6 @@ export class PageTitle extends React.Component<Props, State> {
                                         <span className="text uppercase" id="environment">{info.environment}</span>
                                     </span>
                                 </li>
-                                <li>
-                                    <span className="navbar-cluster-info">
-                                        <span className="uppercase">Uptime</span><br/>
-                                        <span data-toggle="tooltip" data-placement="bottom" title="Connection status">
-                                        {this.renderStatusLight()}
-                                         </span>
-                                        &nbsp;
-                                        <span className="text" id="uptime">{info.uptime}</span>
-                                    </span>
-                                </li>
                             </ul>
                         </div>
                     </div>
