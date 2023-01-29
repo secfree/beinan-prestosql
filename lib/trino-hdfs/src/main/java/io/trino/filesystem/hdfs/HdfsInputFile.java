@@ -34,9 +34,9 @@ class HdfsInputFile
         implements TrinoInputFile
 {
     private final String path;
-    private final HdfsEnvironment environment;
-    private final HdfsContext context;
-    private final Path file;
+    protected final HdfsEnvironment environment;
+    protected final HdfsContext context;
+    protected final Path file;
     private Long length;
     private FileStatus status;
 
@@ -108,7 +108,7 @@ class HdfsInputFile
         return environment.doAs(context.getIdentity(), () -> fileSystem.open(file));
     }
 
-    private FileStatus lazyStatus()
+    protected FileStatus lazyStatus()
             throws IOException
     {
         if (status == null) {
