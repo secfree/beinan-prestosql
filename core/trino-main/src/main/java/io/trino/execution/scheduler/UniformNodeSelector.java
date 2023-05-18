@@ -178,25 +178,12 @@ public class UniformNodeSelector
         // splitsToBeRedistributed becomes true only when splits go through locality-based assignment
         boolean splitsToBeRedistributed = false;
         Set<Split> remainingSplits = new HashSet<>(splits.size());
+        Set<Split> remainingSplits2 = new HashSet<>(splits.size());
 
         List<InternalNode> filteredNodes = filterNodes(nodeMap, includeCoordinator, ImmutableSet.of());
         ResettableRandomizedIterator<InternalNode> randomCandidates = new ResettableRandomizedIterator<>(filteredNodes);
         Set<InternalNode> schedulableNodes = new HashSet<>(filteredNodes);
 
-        if (cacheAffinityPolicy != NONE) {
-            SimpleNodeProvider nodeProvider = new SimpleNodeProvider(filteredNodes);
-            for (Split split : splits) {
-                if (split.getConnectorSplit().getCacheIdentifier().isPresent()) {
-                    List<InternalNode> candidateNodes = selectExactNodes(nodeMap,
-                            nodeProvider.get(split.getConnectorSplit().getCacheIdentifier().get(), 2), includeCoordinator);
-                    if (assign(assignment, assignmentStats, split, candidateNodes)) {
-                        splitsToBeRedistributed = true;
-                        continue;
-                    }
-                }
-                remainingSplits.add(split);
-            }
-        }
         // optimizedLocalScheduling enables prioritized assignment of splits to local nodes when splits contain locality information
         if (optimizedLocalScheduling) {
             for (Split split : splits) {
@@ -215,7 +202,22 @@ public class UniformNodeSelector
             remainingSplits = splits;
         }
 
-        for (Split split : remainingSplits) {
+        if (cacheAffinityPolicy != NONE) {
+            SimpleNodeProvider nodeProvider = new SimpleNodeProvider(filteredNodes);
+            for (Split split : remainingSplits) {
+                if (split.getConnectorSplit().getCacheIdentifier().isPresent()) {
+                    List<InternalNode> candidateNodes = selectExactNodes(nodeMap,
+                            nodeProvider.get(split.getConnectorSplit().getCacheIdentifier().get(), 2), includeCoordinator);
+                    if (assign(assignment, assignmentStats, split, candidateNodes)) {
+                        splitsToBeRedistributed = true;
+                        continue;
+                    }
+                }
+                remainingSplits2.add(split);
+            }
+        }
+
+        for (Split split : remainingSplits2) {
             randomCandidates.reset();
 
             List<InternalNode> candidateNodes;
