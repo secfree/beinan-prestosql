@@ -26,6 +26,7 @@ public class CachingFileSystemConfig
     private boolean cacheEnabled;
     private String baseDirectory;
     private DataSize maxCacheSize = DataSize.of(2, GIGABYTE);
+    private String filterClass;
 
     public boolean isCacheEnabled()
     {
@@ -64,6 +65,20 @@ public class CachingFileSystemConfig
     public CachingFileSystemConfig setMaxCacheSize(DataSize maxCacheSize)
     {
         this.maxCacheSize = maxCacheSize;
+        return this;
+    }
+
+    @Nullable
+    public String getFilterClass()
+    {
+        return filterClass;
+    }
+
+    @Config("cache.filter-class")
+    @ConfigDescription("The implementation class of CacheFilter")
+    public CachingFileSystemConfig setFilterClass(String filterClass)
+    {
+        this.filterClass = filterClass;
         return this;
     }
 }

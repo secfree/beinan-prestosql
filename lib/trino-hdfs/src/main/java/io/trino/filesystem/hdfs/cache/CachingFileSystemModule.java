@@ -61,6 +61,9 @@ public class CachingFileSystemModule
         }
         alluxioProperties.set(PropertyKey.USER_CLIENT_CACHE_SIZE, config.getMaxCacheSize().toString());
         alluxioProperties.set(PropertyKey.USER_CLIENT_CACHE_SHADOW_ENABLED, "true");
+        if (config.getFilterClass() != null) {
+            alluxioProperties.set(PropertyKey.USER_CLIENT_CACHE_FILTER_CLASS, config.getFilterClass());
+        }
         return new InstancedConfiguration(alluxioProperties);
     }
 
