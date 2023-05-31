@@ -14,6 +14,7 @@
 package io.trino.filesystem.hdfs;
 
 import alluxio.client.file.cache.CacheManager;
+import alluxio.client.file.cache.filter.CacheFilter;
 import alluxio.conf.AlluxioConfiguration;
 import io.trino.filesystem.TrinoInputFile;
 import io.trino.hdfs.HdfsContext;
@@ -24,23 +25,26 @@ public class CachingHdfsFileSystem
 {
     private final CacheManager cacheManager;
     private final AlluxioConfiguration alluxioConf;
+    private final CacheFilter cacheFilter;
 
-    public CachingHdfsFileSystem(HdfsEnvironment environment, HdfsContext context, CacheManager cacheManager, AlluxioConfiguration alluxioConf)
+    public CachingHdfsFileSystem(HdfsEnvironment environment, HdfsContext context,
+            CacheManager cacheManager, AlluxioConfiguration alluxioConf, CacheFilter cacheFilter)
     {
         super(environment, context);
         this.cacheManager = cacheManager;
         this.alluxioConf = alluxioConf;
+        this.cacheFilter = cacheFilter;
     }
 
     @Override
     public TrinoInputFile newInputFile(String path)
     {
-        return new CachingHdfsInputFile(path, null, environment, context, cacheManager, alluxioConf);
+        return new CachingHdfsInputFile(path, null, environment, context, cacheManager, alluxioConf, cacheFilter);
     }
 
     @Override
     public TrinoInputFile newInputFile(String path, long length)
     {
-        return new CachingHdfsInputFile(path, length, environment, context, cacheManager, alluxioConf);
+        return new CachingHdfsInputFile(path, length, environment, context, cacheManager, alluxioConf, cacheFilter);
     }
 }

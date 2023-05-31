@@ -17,6 +17,7 @@ import alluxio.client.file.CacheContext;
 import alluxio.client.file.URIStatus;
 import alluxio.client.file.cache.CacheManager;
 import alluxio.client.file.cache.LocalCacheFileInStream;
+import alluxio.client.file.cache.filter.CacheFilter;
 import alluxio.conf.AlluxioConfiguration;
 import alluxio.hadoop.AlluxioHdfsInputStream;
 import alluxio.hadoop.HdfsFileInputStream;
@@ -37,15 +38,17 @@ public class CachingHdfsInputFile
 {
     private final CacheManager cacheManager;
     private final AlluxioConfiguration alluxioConf;
+    private final CacheFilter cacheFilter;
 
     private final FileSystem.Statistics statistics = new FileSystem.Statistics("alluxio");
 
     public CachingHdfsInputFile(String path, Long length, HdfsEnvironment environment, HdfsContext context,
-            CacheManager cacheManager, AlluxioConfiguration alluxioConf)
+            CacheManager cacheManager, AlluxioConfiguration alluxioConf, CacheFilter cacheFilter)
     {
         super(path, length, environment, context);
         this.cacheManager = cacheManager;
         this.alluxioConf = alluxioConf;
+        this.cacheFilter = cacheFilter;
     }
 
     @Override
@@ -59,11 +62,17 @@ public class CachingHdfsInputFile
                     .setPath(file.toString())
                     .setFolder(false)
                     .setLength(lazyStatus().getLen());
-            String cacheIdentifier = md5().hashString(file.toString() + lazyStatus().getModificationTime(), UTF_8).toString();
-            URIStatus uriStatus = new URIStatus(info, CacheContext.defaults().setCacheIdentifier(cacheIdentifier));
-            return new FSDataInputStream(new HdfsFileInputStream(
-                    new LocalCacheFileInStream(uriStatus, (uri) -> new AlluxioHdfsInputStream(fileSystem.open(file)), cacheManager, alluxioConf),
-                    statistics));
+            URIStatus uriStatus = new URIStatus(info, CacheContext.defaults());
+            if (!cacheFilter.needsCache(uriStatus)) {
+                return fileSystem.open(file);
+            }
+            else {
+                String cacheIdentifier = md5().hashString(file.toString() + lazyStatus().getModificationTime(), UTF_8).toString();
+                uriStatus.getCacheContext().setCacheIdentifier(cacheIdentifier);
+                return new FSDataInputStream(new HdfsFileInputStream(
+                        new LocalCacheFileInStream(uriStatus, (uri) -> new AlluxioHdfsInputStream(fileSystem.open(file)), cacheManager, alluxioConf),
+                        statistics));
+            }
         });
         return new HdfsInput(input, this);
     }

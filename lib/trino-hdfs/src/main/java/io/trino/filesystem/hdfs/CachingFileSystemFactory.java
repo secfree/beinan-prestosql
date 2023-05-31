@@ -14,6 +14,7 @@
 package io.trino.filesystem.hdfs;
 
 import alluxio.client.file.cache.CacheManager;
+import alluxio.client.file.cache.filter.CacheFilter;
 import alluxio.conf.AlluxioConfiguration;
 import io.trino.filesystem.TrinoFileSystem;
 import io.trino.filesystem.TrinoFileSystemFactory;
@@ -31,19 +32,21 @@ public class CachingFileSystemFactory
     private final HdfsEnvironment environment;
     private final CacheManager cacheManager;
     private final AlluxioConfiguration alluxioConf;
+    private final CacheFilter cacheFilter;
 
     @Inject
     public CachingFileSystemFactory(HdfsEnvironment environment,
-            CacheManager cacheManager, AlluxioConfiguration alluxioConf)
+            CacheManager cacheManager, AlluxioConfiguration alluxioConf, CacheFilter cacheFilter)
     {
         this.environment = requireNonNull(environment, "environment is null");
         this.cacheManager = requireNonNull(cacheManager, "cacheManager is null");
         this.alluxioConf = requireNonNull(alluxioConf, "alluxioConf is null");
+        this.cacheFilter = requireNonNull(cacheFilter, "cacheFilter is null");
     }
 
     @Override
     public TrinoFileSystem create(ConnectorIdentity identity)
     {
-        return new CachingHdfsFileSystem(environment, new HdfsContext(identity), cacheManager, alluxioConf);
+        return new CachingHdfsFileSystem(environment, new HdfsContext(identity), cacheManager, alluxioConf, cacheFilter);
     }
 }

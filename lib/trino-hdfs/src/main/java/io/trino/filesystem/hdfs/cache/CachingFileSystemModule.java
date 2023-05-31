@@ -14,6 +14,7 @@
 package io.trino.filesystem.hdfs.cache;
 
 import alluxio.client.file.cache.CacheManager;
+import alluxio.client.file.cache.filter.CacheFilter;
 import alluxio.conf.AlluxioConfiguration;
 import alluxio.conf.AlluxioProperties;
 import alluxio.conf.InstancedConfiguration;
@@ -74,5 +75,13 @@ public class CachingFileSystemModule
         catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Inject
+    @Provides
+    @Singleton
+    public CacheFilter getCacheFilter(AlluxioConfiguration alluxioConfiguration)
+    {
+        return CacheFilter.create(alluxioConfiguration);
     }
 }
