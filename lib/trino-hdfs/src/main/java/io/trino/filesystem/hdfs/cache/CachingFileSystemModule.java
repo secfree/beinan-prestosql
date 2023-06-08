@@ -64,6 +64,9 @@ public class CachingFileSystemModule
         if (config.getFilterClass() != null) {
             alluxioProperties.set(PropertyKey.USER_CLIENT_CACHE_FILTER_CLASS, config.getFilterClass());
         }
+        if (config.getFilterConfigFile() != null) {
+            alluxioProperties.set(PropertyKey.USER_CLIENT_CACHE_FILTER_CONFIG_FILE, config.getFilterConfigFile());
+        }
         return new InstancedConfiguration(alluxioProperties);
     }
 

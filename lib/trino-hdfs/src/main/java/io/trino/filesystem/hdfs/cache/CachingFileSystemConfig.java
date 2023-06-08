@@ -27,6 +27,7 @@ public class CachingFileSystemConfig
     private String baseDirectory;
     private DataSize maxCacheSize = DataSize.of(2, GIGABYTE);
     private String filterClass;
+    private String filterConfigFile;
 
     public boolean isCacheEnabled()
     {
@@ -79,6 +80,20 @@ public class CachingFileSystemConfig
     public CachingFileSystemConfig setFilterClass(String filterClass)
     {
         this.filterClass = filterClass;
+        return this;
+    }
+
+    @Nullable
+    public String getFilterConfigFile()
+    {
+        return filterConfigFile;
+    }
+
+    @Config("cache.filter-config-file")
+    @ConfigDescription("The alluxio cache filter config file")
+    public CachingFileSystemConfig setFilterConfigFile(String filterConfigFile)
+    {
+        this.filterConfigFile = filterConfigFile;
         return this;
     }
 }
